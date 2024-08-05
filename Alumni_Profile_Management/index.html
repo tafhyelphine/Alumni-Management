@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv=""X-UA-Compatible" content="IE+edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <div class="wrapper">
+        <form action="main_page.html">
+            <h1>Login</h1>
+            <div class="input-box">
+                <input type="email" id="email" name="email" placeholder="E-mail" required>
+                <i class='bx bxs-user'></i>
+            </div>
+            <div class="input-box">
+                <input type="password" id="password" name="password" placeholder="Password" required pattern="^(?!.*\s).{6,}$" title="Password must be at least 6 characters long and not contain spaces">
+                <i class='bx bxs-lock-alt'></i>
+            </div>
+            <div class="remember-forgot">
+                <a href="#" id="forgot-password">Forgot password?</a>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+    </div>
+</body>
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getDatabase, set, ref } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAlLHukuhwXPKk9jib94L818g_DyXd6UF8",
+      authDomain: "alumni-profile-management.firebaseapp.com",
+      projectId: "alumni-profile-management",
+      storageBucket: "alumni-profile-management.appspot.com",
+      messagingSenderId: "914520680462",
+      appId: "1:914520680462:web:5285057979c21c53aab45f"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+
+    const loginForm = document.querySelector('form');
+    const forgotPasswordLink = document.getElementById('forgot-password');
+
+
+    loginForm.addEventListener('submit',(e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                window.location.href = 'main_page.html'
+                // ...
+            })
+            .catch((error) => {
+                const errorMessage = error.message;
+                alert(errorMessage);
+                // ..
+            });   
+    }); 
+    
+    forgotPasswordLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        
+        sendPasswordResetEmail(auth, email)
+            .then(() => {
+                alert('Password reset email sent. Please check your inbox.');
+            })
+            .catch((error) => {
+                const errorMessage = error.message;
+                alert(errorMessage);
+            });
+    });    
+</script>  
+</html>

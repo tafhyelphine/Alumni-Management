@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adding Filters</title>
+    <link rel="stylesheet" href="domainstyle.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8f8/TQ5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.17.0/dist/xlsx.full.min.js"></script>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: #343a40; /* Dark blue color */
+        }
+        th, td {
+            padding: 8px;
+            border: none; /* Remove white lines */
+            color: #fff; /* White text for better contrast */
+        }
+        .filter-header {
+            background-color: rgba(248, 249, 250, 0.8); 
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .filter-header .form-label {
+            color: black; /* Change label text color */
+            font-weight: bold;
+        }
+        .filter-header .form-control {
+            margin-top: 5px;
+            font-size: 1.2em; /* Larger input fields */
+        }
+        .filter-header button {
+            font-size: 1.2em; /* Larger buttons */
+            border-radius: 50px; /* Round shape */
+        }
+        .filter-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .table-container {
+            margin-bottom: 20px;
+        }
+        .circular-btn {
+            border-radius: 50px; /* Circular shape */
+            padding: 10px 20px; /* Larger button */
+        }
+        .icon-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        .icon-bar a {
+            margin-left: 15px;
+            font-size: 24px;
+            color: #000;
+            text-decoration: none;
+        }
+        .icon-bar a:hover {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <section class="header">
+        <nav class="d-flex align-items-center">
+            <a href="main_page.html"><img src="ssnlogo.png" alt="Logo"></a>
+            <div class="nav-links">
+                <ul>
+                    <li><a href="main_page.html">HOME</a></li>
+                    <li><a href="about.html">ABOUT</a></li>
+                    <li><a href="contact.html">CONTACT</a></li>
+                </ul>
+            </div>
+        </nav>
+    </section>
+
+    <!-- New Header Section with Icons -->
+    <section class="icon-bar">
+        <a href="AlumniList.html" title="show Alumni">&#x1F441;</a> <!-- Add icon -->
+        <a href="add.html" title="Add Alumni">&#x2795;</a> <!-- Add icon -->
+        <a href="edit.html" title="Edit Alumni">&#x270E;</a> <!-- Edit icon -->
+        <a href="delete.html" title="Delete Alumni">&#x1F5D1;</a> <!-- Delete icon -->
+    </section>
+
+    <section class="filter-header container">
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label for="filterCategory" class="form-label">Filter by Category:</label>
+                <select id="filterCategory" class="form-control">
+                    <option value="">Select Filter</option>
+                    <option value="year">Year</option>
+                    <option value="domain">Domain</option>
+                    <option value="company">Company</option>
+                    <option value="current_location">Location</option>
+                    <option value="current_job">Job</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filterOptions" class="form-label">Select Filter:</label>
+                <div id="filterOptions" class="form-group"></div>
+            </div>
+            <div class="col-md-3 filter-buttons">
+                <button id="applyFilter" class="btn btn-primary circular-btn">Apply Filters <span id="filterCount">(0)</span></button>
+                <button id="clearFilters" class="btn btn-secondary ml-2 circular-btn">Clear Filters</button>
+            </div>
+            <div class="col-md-3">
+                <label for="searchInput" class="form-label">Search by name:</label>
+                <input id="searchInput" type="text" placeholder="Search by name..." class="form-control" />
+            </div>
+        </div>
+    </section>
+
+    <div class="container table-container w-75">
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th>Sno</th>
+                    <th>Name</th>
+                    <th>Year</th>
+                    <th>Email</th>
+                    <th>Domain</th>
+                    <th>Location</th>
+                    <th>Job</th>
+                    <th>Company</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tbody1"></tbody>
+        </table>
+    </div>
+
+    <footer class="container w-75 text-right mt-3">
+        <button id="downloadButton" class="btn btn-success circular-btn">Download Excel</button>
+        <button id="sendEmailButton" class="btn btn-info circular-btn ml-2">Send Emails</button>
+    </footer>
+    
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+        import { getFirestore, collection, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlLHukuhwXPKk9jib94L818g_DyXd6UF8",
+            authDomain: "alumni-profile-management.firebaseapp.com",
+            databaseURL: "https://alumni-profile-management-default-rtdb.firebaseio.com",
+            projectId: "alumni-profile-management",
+            storageBucket: "alumni-profile-management.appspot.com",
+            messagingSenderId: "914520680462",
+            appId: "1:914520680462:web:5285057979c21c53aab45f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let alumniData = [];
+        let filteredAlumniData = [];
+        let filterState = {
+            year: [],
+            domain: [],
+            company: [],
+            current_location: [],
+            current_job: []
+        };
+
+        async function getAllDataRealtime() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "AlumniList"));
+                alumniData = [];
+                querySnapshot.forEach(doc => {
+                    alumniData.push({ ...doc.data(), id: doc.id });
+                });
+                addAllItemsToTable(alumniData);
+                populateFilterOptions(alumniData);
+                filteredAlumniData = alumniData;
+            } catch (error) {
+                console.error("Error getting documents: ", error);
+            }
+        }
+
+        function addItemsToTable(alumni, index) {
+            const tbody = document.getElementById('tbody1');
+            const row = tbody.insertRow();
+
+            row.insertCell(0).innerHTML = index + 1;
+            row.insertCell(1).innerHTML = alumni.name;
+            row.insertCell(2).innerHTML = alumni.graduation_year;
+            row.insertCell(3).innerHTML = alumni.email;
+            row.insertCell(4).innerHTML = alumni.domain;
+            row.insertCell(5).innerHTML = alumni.current_location;
+            row.insertCell(6).innerHTML = alumni.current_job;
+            row.insertCell(7).innerHTML = alumni.company;
+
+            const actionCell = row.insertCell(8);
+            const sendEmailButton = document.createElement('button');
+            sendEmailButton.className = 'btn btn-info';
+            sendEmailButton.textContent = 'Send Email';
+            sendEmailButton.addEventListener('click', () => {
+                const subject = "Invitation to Attend Conference";
+                const body = "Dear " + alumni.name + ",%0D%0A%0D%0AWe are pleased to invite you to attend a conference regarding your domain. Looking forward to your participation.%0D%0A%0D%0AThank you,%0D%0A[Your Organization]";
+                window.location.href = `mailto:${alumni.email}?subject=${subject}&body=${body}`;
+            });
+            actionCell.appendChild(sendEmailButton);
+        }
+
+        function addAllItemsToTable(alumniList) {
+            const tbody = document.getElementById('tbody1');
+            tbody.innerHTML = "";
+            alumniList.forEach((alumni, index) => addItemsToTable(alumni, index));
+        }
+
+        function populateFilterOptions(alumniList) {
+            const filterCategory = document.getElementById('filterCategory');
+            const filterOptions = document.getElementById('filterOptions');
+
+            const categories = {
+                year: new Set(),
+                domain: new Set(),
+                company: new Set(),
+                current_location: new Set(),
+                current_job: new Set()
+            };
+
+            alumniList.forEach(alumni => {
+                categories.year.add(alumni.graduation_year.toString().toUpperCase());
+                categories.domain.add(alumni.domain.toUpperCase());
+                categories.company.add(alumni.company.toUpperCase());
+                categories.current_location.add(alumni.current_location.toUpperCase());
+                categories.current_job.add(alumni.current_job.toUpperCase());
+            });
+
+            filterCategory.addEventListener('change', () => {
+                filterOptions.innerHTML = '';
+                const selectedCategory = filterCategory.value;
+
+                if (categories[selectedCategory]) {
+                    categories[selectedCategory].forEach(option => {
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = option;
+                        checkbox.value = option;
+                        checkbox.checked = filterState[selectedCategory].includes(option);
+
+                        const label = document.createElement('label');
+                        label.htmlFor = option;
+                        label.textContent = option;
+
+                        const div = document.createElement('div');
+                        div.appendChild(checkbox);
+                        div.appendChild(label);
+
+                        filterOptions.appendChild(div);
+                    });
+                }
+            });
+        }
+
+        document.getElementById('applyFilter').addEventListener('click', () => {
+            const filterCategory = document.getElementById('filterCategory').value;
+            const filterOptions = document.getElementById('filterOptions').getElementsByTagName('input');
+
+            filterState[filterCategory] = Array.from(filterOptions)
+                .filter(input => input.checked)
+                .map(input => input.value);
+
+            applyFilters();
+        });
+
+        document.getElementById('clearFilters').addEventListener('click', () => {
+            filterState = {
+                year: [],
+                domain: [],
+                company: [],
+                current_location: [],
+                current_job: []
+            };
+
+            document.getElementById('filterCategory').value = '';
+            document.getElementById('filterOptions').innerHTML = '';
+            document.getElementById('searchInput').value = '';
+            addAllItemsToTable(alumniData);
+        });
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchText = e.target.value.toLowerCase();
+            filteredAlumniData = alumniData.filter(alumni => alumni.name.toLowerCase().includes(searchText));
+            addAllItemsToTable(filteredAlumniData);
+        });
+
+        function applyFilters() {
+            filteredAlumniData = alumniData.filter(alumni => {
+                return (!filterState.year.length || filterState.year.includes(alumni.graduation_year.toString().toUpperCase())) &&
+                       (!filterState.domain.length || filterState.domain.includes(alumni.domain.toUpperCase())) &&
+                       (!filterState.company.length || filterState.company.includes(alumni.company.toUpperCase())) &&
+                       (!filterState.current_location.length || filterState.current_location.includes(alumni.current_location.toUpperCase())) &&
+                       (!filterState.current_job.length || filterState.current_job.includes(alumni.current_job.toUpperCase()));
+            });
+            addAllItemsToTable(filteredAlumniData);
+        }
+
+        document.getElementById('downloadButton').addEventListener('click', () => {
+            const worksheet = XLSX.utils.json_to_sheet(filteredAlumniData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "AlumniList");
+            XLSX.writeFile(workbook, "AlumniList.xlsx");
+        });
+
+        document.getElementById('sendEmailButton').addEventListener('click', () => {
+            const emails = filteredAlumniData.map(alumni => alumni.email).join(',');
+            const subject = "Invitation to Attend Conference";
+            const body = "Dear Alumni,%0D%0A%0D%0AWe are pleased to invite you to attend a conference regarding your domain. Looking forward to your participation.%0D%0A%0D%0AThank you,%0D%0A[Your Organization]";
+            window.location.href = `mailto:${emails}?subject=${subject}&body=${body}`;
+        });
+
+        window.onload = getAllDataRealtime;
+    </script>
+</body>
+</html>

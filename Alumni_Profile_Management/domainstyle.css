@@ -1,0 +1,182 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0; /* Remove default body margin */
+    padding: 0; /* Remove default body padding */
+    background: url('ssn.jpg') no-repeat;
+    background-size: cover;
+    background-position: center; 
+    display: flex;
+    flex-direction: column; /* Align content in a column */
+}
+
+.header {
+    width: 100%;
+    background-image: linear-gradient(rgba(4, 8, 30, 0.221),rgba(4, 8, 30, 0.221),url('ssnlogo.png'));
+    background-color: rgba(255,255,255,0.1);
+    backdrop-filter: blur(5px);
+    background-position: center;
+    background-size: cover;
+    position: relative;
+    margin-bottom: 20px; /* Add margin-bottom to create space between header and table */
+}
+
+.filter-header label.form-label {
+    font-weight: bold;
+    color: white;
+}
+
+.filter-header .form-control {
+    border-radius: 20px; /* Adjust the border radius as needed */
+}
+
+
+nav {
+    margin: 0 auto;
+    display: flex;
+    padding: 20px 60px;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, .5);
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px; /* Add margin-bottom to create space between nav and table */
+}
+
+
+nav img{
+    width: 150px;
+}
+
+.nav-links{
+    flex: 1;
+    text-align: right;
+}
+
+.nav-links ul li{
+    list-style: none;
+    display: inline-block;
+    padding: 8px 12px;
+    position: relative;
+}
+
+.nav-links ul li a{
+    color: #030b397d;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.nav-links ul li::after{
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #07d2d2;
+    display: block;
+    margin: auto;
+    transition: 0.5s;
+}
+
+.nav-links ul li:hover::after{
+    width: 100%
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    margin: 20px;
+}
+
+.table th,
+.table td {
+    text-align: center;
+}
+
+.table thead th {
+    background-color: #031c35;
+    color: #fff;
+}
+
+.table tbody td {
+    background-color: #002c59;
+    color: #fff;
+}
+
+.table tbody td:first-child {
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .table {
+        width: 90%;
+        margin: 10px auto;
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .table {
+        width: 100%;
+        margin: 10px;
+        overflow-x: auto; /* Add horizontal scroll for small screens */
+    }
+}
+.alumni-form {
+    width: 100%; /* Adjust the width of the form as needed */
+    max-width: 600px; /* Optional: Limit the maximum width */
+    margin: 0 auto; /* Center the form horizontally */
+}
+
+.alumni-form .form-control {
+    width: 100%; /* Make the input fields take up the full width of the form */
+    margin-bottom: 10px; /* Add some space between input fields */
+}
+
+.alumni-form .btn {
+    width: 100%; /* Make the button take up the full width of the form */
+}
+
+.filter-header {
+    background-color: #885d8a;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+.header img {
+    height: 50px;
+}
+.nav-links {
+    margin-left: auto;
+}
+.nav-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+.nav-links ul li {
+    margin-right: 20px;
+}
+.nav-links ul li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}

@@ -1,0 +1,7 @@
+            apiKey: "AIzaSyAlLHukuhwXPKk9jib94L818g_DyXd6UF8",
+            authDomain: "alumni-profile-management.firebaseapp.com",
+            databaseURL: "https://alumni-profile-management-default-rtdb.firebaseio.com",
+            projectId: "alumni-profile-management",
+            storageBucket: "alumni-profile-management.appspot.com",
+            messagingSenderId: "914520680462",
+            appId: "1:914520680462:web:5285057979c21c53aab45f"

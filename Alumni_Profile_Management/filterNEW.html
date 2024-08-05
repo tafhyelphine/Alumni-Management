@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deleting Alumni Data</title>
+    <link rel="stylesheet" href="domainstyle.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8f8/TQ5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.17.0/dist/xlsx.full.min.js"></script>
+    <style>
+        .filter-header {
+            background-color: #885d8a;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .header img {
+            height: 50px;
+        }
+        .nav-links {
+            margin-left: auto;
+        }
+        .nav-links ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+        .nav-links ul li {
+            margin-right: 20px;
+        }
+        .nav-links ul li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <section class="header">
+        <nav class="d-flex align-items-center">
+            <a href="main_page.html"><img src="ssnlogo.png" alt="Logo"></a>
+            <div class="nav-links">
+                <ul>
+                    <li><a href="main_page.html">HOME</a></li>
+                    <li><a href="about.html">ABOUT</a></li>
+                    <li><a href="contact.html">CONTACT</a></li>
+                </ul>
+            </div>
+        </nav>
+    </section>
+
+    <section class="filter-header">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <label for="filterCategory" class="form-label">Filter by Category:</label>
+                    <select id="filterCategory" class="form-control">
+                        <option value="">Select Filter</option>
+                        <option value="year">Year</option>
+                        <option value="domain">Domain</option>
+                        <option value="company">Company</option>
+                        <option value="current_location">Location</option>
+                        <option value="current_job">Job</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <div id="filterOptions" class="form-group"></div>
+                </div>
+                <div class="col">
+                    <button id="applyFilter" class="btn btn-primary">Apply Filters <span id="filterCount">(0)</span></button>
+                    <button id="clearFilters" class="btn btn-secondary ml-2">Clear Filters</button>
+                </div>
+                <div class="col">
+                    <input id="searchInput" type="text" placeholder="Search by name..." class="form-control" />
+                </div>
+                <div class="col">
+                    <button id="downloadButton" class="btn btn-success">Download Excel</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container w-75">
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th>Sno</th>
+                    <th>Name</th>
+                    <th>Year</th>
+                    <th>Email</th>
+                    <th>Domain</th>
+                    <th>Location</th>
+                    <th>Job</th>
+                    <th>Company</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tbody1"></tbody>
+        </table>
+    </div>
+    
+    <!-- Edit Alumni Modal -->
+    <div class="modal fade" id="editAlumniModal" tabindex="-1" role="dialog" aria-labelledby="editAlumniModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editAlumniModalLabel">Edit Alumni</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="alumniForm">
+                        <div class="form-group">
+                            <label for="editName">Name</label>
+                            <input type="text" class="form-control" id="editName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editYear">Year</label>
+                            <input type="number" class="form-control" id="editYear" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editEmail">Email</label>
+                            <input type="email" class="form-control" id="editEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editDomain">Domain</label>
+                            <input type="text" class="form-control" id="editDomain" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editLocation">Location</label>
+                            <input type="text" class="form-control" id="editLocation" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editJob">Job</label>
+                            <input type="text" class="form-control" id="editJob" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editCompany">Company</label>
+                            <input type="text" class="form-control" id="editCompany" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poTt80n7YI5KkDd0yQ+RaXZoz47ekA9D+2EApf2W5kBPznngyn7" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" integrity="sha384-pzjw8f+ua7Kw1TIqxdAn1w7LRNypBbb7yD1F1pI5SwR31DXO1hbU+Ev+B4Kw0Hj8" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgEPzWFPDh7mdf4bKbV2FpcCW59J5yF9E4l+Sg5Lt8yyFTOdGxm" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.17.0/dist/xlsx.full.min.js"></script>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+        import { getFirestore, collection, getDocs, deleteDoc, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlLHukuhwXPKk9jib94L818g_DyXd6UF8",
+            authDomain: "alumni-profile-management.firebaseapp.com",
+            databaseURL: "https://alumni-profile-management-default-rtdb.firebaseio.com",
+            projectId: "alumni-profile-management",
+            storageBucket: "alumni-profile-management.appspot.com",
+            messagingSenderId: "914520680462",
+            appId: "1:914520680462:web:5285057979c21c53aab45f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let alumniData = [];
+        let currentDocId = '';
+
+        async function getAllDataRealtime() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "AlumniList"));
+                alumniData = [];
+                querySnapshot.forEach(doc => {
+                    alumniData.push({ ...doc.data(), id: doc.id });
+                });
+                addAllItemsToTable(alumniData);
+                populateFilterOptions(alumniData);
+            } catch (error) {
+                console.error("Error getting documents: ", error);
+            }
+        }
+
+        function addItemsToTable(alumni, index) {
+            const tbody = document.getElementById('tbody1');
+            const row = tbody.insertRow();
+
+            row.insertCell(0).innerHTML = index + 1;
+            row.insertCell(1).innerHTML = alumni.name;
+            row.insertCell(2).innerHTML = alumni.graduation_year;
+            row.insertCell(3).innerHTML = alumni.email;
+            row.insertCell(4).innerHTML = alumni.domain;
+            row.insertCell(5).innerHTML = alumni.current_location;
+            row.insertCell(6).innerHTML = alumni.current_job;
+            row.insertCell(7).innerHTML = alumni.current_company;
+            const actionCell = row.insertCell(8);
+            actionCell.innerHTML = `
+                <button class="btn btn-warning btn-sm edit-button" data-id="${alumni.id}" data-toggle="modal" data-target="#editAlumniModal">Edit</button>
+                <button class="btn btn-danger btn-sm delete-button" data-id="${alumni.id}">Delete</button>
+            `;
+
+            actionCell.querySelector('.delete-button').addEventListener('click', () => deleteItem(alumni.id));
+            actionCell.querySelector('.edit-button').addEventListener('click', () => openEditModal(alumni.id));
+        }
+
+        function addAllItemsToTable(alumniList) {
+            const tbody = document.getElementById('tbody1');
+            tbody.innerHTML = '';
+            alumniList.forEach((alumni, index) => addItemsToTable(alumni, index));
+        }
+
+        async function deleteItem(id) {
+            await deleteDoc(doc(db, "AlumniList", id));
+            getAllDataRealtime();
+        }
+
+        function openEditModal(id) {
+            const alumni = alumniData.find(item => item.id === id);
+            currentDocId = id;
+
+            document.getElementById('editName').value = alumni.name;
+            document.getElementById('editYear').value = alumni.graduation_year;
+            document.getElementById('editEmail').value = alumni.email;
+            document.getElementById('editDomain').value = alumni.domain;
+            document.getElementById('editLocation').value = alumni.current_location;
+            document.getElementById('editJob').value = alumni.current_job;
+            document.getElementById('editCompany').value = alumni.current_company;
+        }
+
+        document.getElementById('alumniForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const updatedAlumni = {
+                name: document.getElementById('editName').value,
+                graduation_year: document.getElementById('editYear').value,
+                email: document.getElementById('editEmail').value,
+                domain: document.getElementById('editDomain').value,
+                current_location: document.getElementById('editLocation').value,
+                current_job: document.getElementById('editJob').value,
+                current_company: document.getElementById('editCompany').value
+            };
+
+            const alumniDoc = doc(db, "AlumniList", currentDocId);
+            await updateDoc(alumniDoc, updatedAlumni);
+            getAllDataRealtime();
+            $('#editAlumniModal').modal('hide');
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const searchValue = this.value.toLowerCase();
+            const filteredData = alumniData.filter(alumni => alumni.name.toLowerCase().includes(searchValue));
+            addAllItemsToTable(filteredData);
+        });
+
+        document.getElementById('applyFilter').addEventListener('click', function () {
+            const filterCategory = document.getElementById('filterCategory').value;
+            const filterValue = document.getElementById('filterOptions').querySelector('input, select').value;
+            let filteredData = alumniData;
+
+            if (filterCategory && filterValue) {
+                filteredData = alumniData.filter(alumni => {
+                    const value = alumni[filterCategory]?.toString().toLowerCase() || '';
+                    return value.includes(filterValue.toLowerCase());
+                });
+            }
+
+            addAllItemsToTable(filteredData);
+            document.getElementById('filterCount').innerText = `(${filteredData.length})`;
+        });
+
+        document.getElementById('clearFilters').addEventListener('click', function () {
+            document.getElementById('filterCategory').value = '';
+            document.getElementById('filterOptions').innerHTML = '';
+            addAllItemsToTable(alumniData);
+            document.getElementById('filterCount').innerText = '(0)';
+        });
+
+        function populateFilterOptions(data) {
+            const filterCategory = document.getElementById('filterCategory');
+            filterCategory.addEventListener('change', function () {
+                const category = this.value;
+                const filterOptions = document.getElementById('filterOptions');
+                filterOptions.innerHTML = '';
+
+                if (!category) return;
+
+                const uniqueValues = [...new Set(data.map(item => item[category]))];
+
+                if (category === 'year') {
+                    const select = document.createElement('select');
+                    select.className = 'form-control';
+                    uniqueValues.forEach(value => {
+                        const option = document.createElement('option');
+                        option.value = value;
+                        option.textContent = value;
+                        select.appendChild(option);
+                    });
+                    filterOptions.appendChild(select);
+                } else {
+                    const input = document.createElement('input');
+                    input.className = 'form-control';
+                    input.type = 'text';
+                    input.placeholder = `Filter by ${category.charAt(0).toUpperCase() + category.slice(1)}`;
+                    filterOptions.appendChild(input);
+                }
+            });
+        }
+
+        document.getElementById('downloadButton').addEventListener('click', function () {
+            const worksheet = XLSX.utils.json_to_sheet(alumniData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Alumni Data');
+            XLSX.writeFile(workbook, 'alumni_data.xlsx');
+        });
+
+        window.onload = getAllDataRealtime;
+    </script>
+</body>
+</html>
